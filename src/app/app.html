@@ -1,0 +1,19 @@
+<div class="app-container">
+    <header *ngIf="showHeader" class="app-header">
+        <div class="header-content">
+            <h1>🎯 Sports Betting Hub</h1>
+            <nav class="nav-links">
+                <a routerLink="/betting-tracker" routerLinkActive="active">Betting Tracker</a>
+                <a routerLink="/lol-match" routerLinkActive="active">LOL Match</a>
+                <button class="theme-toggle" (click)="toggleDarkMode()">
+                    {{ darkMode ? '☀️' : '🌙' }}
+                </button>
+                <button class="logout-btn" (click)="logout()">Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <main [class.no-header]="!showHeader">
+        <router-outlet></router-outlet>
+    </main>
+</div>

@@ -1,0 +1,183 @@
+<div class="container">
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-value">{{ totalMatches }}</div>
+            <div class="stat-label">Total Matches</div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th 
+                        *ngFor="let col of columns"
+                        [class]="'col-' + col.key"
+                        [class.hidden]="!col.visible"
+                        [style.width.px]="col.width">
+                        {{ col.label }}
+                        <div 
+                            *ngIf="col.resizable" 
+                            class="resizer"
+                            (mousedown)="startResize($event, col)">
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- New Row -->
+                <tr class="new-row">
+                    <ng-container *ngFor="let col of columns">
+                        <!-- Row Number -->
+                        <td 
+                            *ngIf="col.key === 'rowNumber'"
+                            [class]="'col-' + col.key"
+                            [class.hidden]="!col.visible"
+                            [style.width.px]="col.width"
+                            class="calc-cell">
+                            -
+                        </td>
+
+                        <!-- Date -->
+                        <td 
+                            *ngIf="col.key === 'date'"
+                            [class]="'col-' + col.key"
+                            [class.hidden]="!col.visible"
+                            [style.width.px]="col.width">
+                            <input 
+                                type="date" 
+                                [(ngModel)]="newMatch.date">
+                        </td>
+
+                        <!-- Text fields -->
+                        <td 
+                            *ngIf="col.type === 'text'"
+                            [class]="'col-' + col.key"
+                            [class.hidden]="!col.visible"
+                            [style.width.px]="col.width">
+                            <input 
+                                type="text" 
+                                [(ngModel)]="newMatch[col.key]">
+                        </td>
+
+                        <!-- Drake Arrays -->
+                        <td 
+                            *ngIf="col.type === 'drakeArray'"
+                            [class]="'col-' + col.key"
+                            [class.hidden]="!col.visible"
+                            [style.width.px]="col.width">
+                            <div class="drake-badges">
+                                <button 
+                                    *ngFor="let drakeType of drakeTypes"
+                                    class="drake-badge"
+                                    [class.active]="hasDrake(col.key === 'drakesA' ? 'A' : 'B', drakeType, true)"
+                                    [title]="drakeType + ' (Left: Add, Right: Remove)'"
+                                    (click)="toggleDrake(col.key === 'drakesA' ? 'A' : 'B', drakeType, true)"
+                                    (contextmenu)="removeDrake(col.key === 'drakesA' ? 'A' : 'B', drakeType, true); $event.preventDefault()">
+                                    {{ drakeAbbreviations[drakeType] }}
+                                    <span *ngIf="getDrakeCount(col.key === 'drakesA' ? 'A' : 'B', drakeType, true) > 0" class="drake-count">
+                                        {{ getDrakeCount(col.key === 'drakesA' ? 'A' : 'B', drakeType, true) }}
+                                    </span>
+                                </button>
+                            </div>
+                        </td>
+
+                        <!-- Action -->
+                        <td 
+                            *ngIf="col.key === 'action'"
+                            [class]="'col-' + col.key"
+                            [class.hidden]="!col.visible"
+                            [style.width.px]="col.width">
+                            <div class="action-buttons">
+                                <button class="btn-add" (click)="addMatch()">ADD</button>
+                            </div>
+                        </td>
+                    </ng-container>
+                </tr>
+
+                <!-- Existing Matches -->
+                <tr 
+                    *ngFor="let match of matches; let i = index; trackBy: trackByIndex"
+                    class="editable-row">
+                    <ng-container *ngFor="let col of columns">
+                        <!-- Row Number -->
+                        <td 
+                            *ngIf="col.key === 'rowNumber'"
+                            [class]="getCellClass(match, col)"
+                            [style.width.px]="col.width"
+                            class="calc-cell">
+                            {{ i + 1 }}
+                        </td>
+
+                        <!-- Date -->
+                        <td 
+                            *ngIf="col.key === 'date'"
+                            [class]="getCellClass(match, col)"
+                            [style.width.px]="col.width">
+                            <input 
+                                type="date" 
+                                [(ngModel)]="match.date"
+                                [disabled]="!isEditing(i)">
+                        </td>
+
+                        <!-- Text fields -->
+                        <td 
+                            *ngIf="col.type === 'text'"
+                            [class]="getCellClass(match, col)"
+                            [style.width.px]="col.width">
+                            <input 
+                                type="text" 
+                                [(ngModel)]="match[col.key]"
+                                [disabled]="!isEditing(i)">
+                        </td>
+
+                        <!-- Drake Arrays -->
+                        <td 
+                            *ngIf="col.type === 'drakeArray'"
+                            [class]="getCellClass(match, col)"
+                            [style.width.px]="col.width">
+                            <div *ngIf="!isEditing(i)" class="drake-display">
+                                {{ getDrakeBadges(col.key === 'drakesA' ? match.drakesA : match.drakesB) }}
+                            </div>
+                            <div *ngIf="isEditing(i)" class="drake-badges">
+                                <button 
+                                    *ngFor="let drakeType of drakeTypes"
+                                    class="drake-badge"
+                                    [class.active]="hasDrake(col.key === 'drakesA' ? 'A' : 'B', drakeType, false, i)"
+                                    [title]="drakeType + ' (Left: Add, Right: Remove)'"
+                                    (click)="toggleDrake(col.key === 'drakesA' ? 'A' : 'B', drakeType, false, i)"
+                                    (contextmenu)="removeDrake(col.key === 'drakesA' ? 'A' : 'B', drakeType, false, i); $event.preventDefault()">
+                                    {{ drakeAbbreviations[drakeType] }}
+                                    <span *ngIf="getDrakeCount(col.key === 'drakesA' ? 'A' : 'B', drakeType, false, i) > 0" class="drake-count">
+                                        {{ getDrakeCount(col.key === 'drakesA' ? 'A' : 'B', drakeType, false, i) }}
+                                    </span>
+                                </button>
+                            </div>
+                        </td>
+
+                        <!-- Action -->
+                        <td 
+                            *ngIf="col.key === 'action'"
+                            [class]="getCellClass(match, col)"
+                            [style.width.px]="col.width">
+                            <div class="action-buttons">
+                                <button 
+                                    [class]="isEditing(i) ? 'btn-save' : 'btn-edit'"
+                                    [title]="isEditing(i) ? 'Save' : 'Update'"
+                                    (click)="toggleEdit(i)">
+                                    {{ isEditing(i) ? '💾' : '✏️' }}
+                                </button>
+                                <button 
+                                    class="btn-delete"
+                                    title="Delete"
+                                    (click)="deleteMatch(i)">
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
