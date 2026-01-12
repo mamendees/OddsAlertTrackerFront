@@ -28,13 +28,8 @@
     <div class="column-settings" [class.show]="showSettings">
         <h3>Show/Hide Columns</h3>
         <div class="column-checkboxes">
-            <label 
-                *ngFor="let col of columns; let i = index" 
-                [class.disabled]="!col.canHide">
-                <input 
-                    type="checkbox" 
-                    [checked]="col.visible" 
-                    [disabled]="!col.canHide"
+            <label *ngFor="let col of columns; let i = index" [class.disabled]="!col.canHide">
+                <input type="checkbox" [checked]="col.visible" [disabled]="!col.canHide"
                     (change)="toggleColumnVisibility(i)">
                 {{ col.label }}
             </label>
@@ -47,17 +42,10 @@
             <!-- Table Header -->
             <thead>
                 <tr>
-                    <th 
-                        *ngFor="let col of columns"
-                        [class]="'col-' + col.key"
-                        [class.hidden]="!col.visible"
-                        [style.width.px]="col.width"
-                        [attr.data-at-min-width]="col.width <= col.minWidth">
+                    <th *ngFor="let col of columns" [class]="'col-' + col.key" [class.hidden]="!col.visible"
+                        [style.width.px]="col.width" [attr.data-at-min-width]="col.width <= col.minWidth">
                         {{ col.label }}
-                        <div 
-                            *ngIf="col.resizable" 
-                            class="resizer"
-                            (mousedown)="startResize($event, col)">
+                        <div *ngIf="col.resizable" class="resizer" (mousedown)="startResize($event, col)">
                         </div>
                     </th>
                 </tr>
@@ -68,95 +56,55 @@
                 <tr class="new-row">
                     <ng-container *ngFor="let col of columns">
                         <!-- Date Column -->
-                        <td 
-                            *ngIf="col.key === 'date'"
-                            [class]="'col-' + col.key"
-                            [class.hidden]="!col.visible"
+                        <td *ngIf="col.key === 'date'" [class]="'col-' + col.key" [class.hidden]="!col.visible"
                             [style.width.px]="col.width">
-                            <input 
-                                type="date" 
-                                [(ngModel)]="newBet.date">
+                            <input type="date" [(ngModel)]="newBet.date">
                         </td>
 
                         <!-- Text Input Columns -->
-                        <td 
-                            *ngIf="col.type === 'text'"
-                            [class]="'col-' + col.key"
-                            [class.hidden]="!col.visible"
+                        <td *ngIf="col.type === 'text'" [class]="'col-' + col.key" [class.hidden]="!col.visible"
                             [style.width.px]="col.width">
-                            <input 
-                                type="text" 
-                                [(ngModel)]="newBet[col.key]">
+                            <input type="text" [(ngModel)]="newBet[col.key]">
                         </td>
 
                         <!-- Decimal Number Columns -->
-                        <td 
-                            *ngIf="col.type === 'number'"
-                            [class]="'col-' + col.key"
-                            [class.hidden]="!col.visible"
+                        <td *ngIf="col.type === 'number'" [class]="'col-' + col.key" [class.hidden]="!col.visible"
                             [style.width.px]="col.width">
-                            <input 
-                                type="number" 
-                                step="0.01"
-                                [(ngModel)]="newBet[col.key]">
+                            <input type="number" step="0.01" [(ngModel)]="newBet[col.key]">
                         </td>
 
                         <!-- Integer Number Columns -->
-                        <td 
-                            *ngIf="col.type === 'long'"
-                            [class]="'col-' + col.key"
-                            [class.hidden]="!col.visible"
+                        <td *ngIf="col.type === 'long'" [class]="'col-' + col.key" [class.hidden]="!col.visible"
                             [style.width.px]="col.width">
-                            <input 
-                                type="number" 
-                                min="0"
-                                step="1"
-                                [(ngModel)]="newBet[col.key]"
+                            <input type="number" min="0" step="1" [(ngModel)]="newBet[col.key]"
                                 (input)="onIntegerInput($event, newBet, col.key)">
                         </td>
 
                         <!-- Select Dropdown Columns -->
-                        <td 
-                            *ngIf="col.type === 'select'"
-                            [class]="'col-' + col.key"
-                            [class.hidden]="!col.visible"
+                        <td *ngIf="col.type === 'select'" [class]="'col-' + col.key" [class.hidden]="!col.visible"
                             [style.width.px]="col.width">
-                            <select 
-                                [(ngModel)]="newBet[col.key]"
-                                (ngModelChange)="col.key === 'wl' ? onNewBetWLChange() : null">
+
+                            <select [value]="newBet[col.key]" (change)="onSelectChange($event, col.key, newBet)">
                                 <option *ngFor="let opt of col.options" [value]="opt">
-                                    {{ opt || '-' }}
+                                    {{ opt }}
                                 </option>
+                                <option value="__ADD_NEW__">➕ Add new...</option>
                             </select>
                         </td>
 
                         <!-- Calculated Columns -->
-                        <td 
-                            *ngIf="col.type === 'calc'"
-                            [class]="'col-' + col.key"
-                            [class.hidden]="!col.visible"
-                            [style.width.px]="col.width"
-                            class="calc-cell">
+                        <td *ngIf="col.type === 'calc'" [class]="'col-' + col.key" [class.hidden]="!col.visible"
+                            [style.width.px]="col.width" class="calc-cell">
                             <!-- Editable Profit Money for Cashout -->
-                            <input 
-                                *ngIf="col.key === 'profitMoney' && isNewBetCashout()"
-                                type="number"
-                                step="0.01"
-                                [(ngModel)]="newBetProfitMoney"
-                                (ngModelChange)="onNewBetProfitMoneyChange()"
-                                class="cashout-input"
-                                placeholder="Enter profit">
-                            
+                            <input *ngIf="col.key === 'profitMoney' && isNewBetCashout()" type="number" step="0.01"
+                                [(ngModel)]="newBetProfitMoney" (ngModelChange)="onNewBetProfitMoneyChange()"
+                                class="cashout-input" placeholder="Enter profit">
+
                             <!-- Editable Profit Units for Cashout -->
-                            <input 
-                                *ngIf="col.key === 'profitUnits' && isNewBetCashout()"
-                                type="number"
-                                step="0.01"
-                                [(ngModel)]="newBetProfitUnits"
-                                (ngModelChange)="onNewBetProfitUnitsChange()"
-                                class="cashout-input"
-                                placeholder="Enter units">
-                            
+                            <input *ngIf="col.key === 'profitUnits' && isNewBetCashout()" type="number" step="0.01"
+                                [(ngModel)]="newBetProfitUnits" (ngModelChange)="onNewBetProfitUnitsChange()"
+                                class="cashout-input" placeholder="Enter units">
+
                             <!-- Display Calculated Values -->
                             <span *ngIf="col.key === 'profitMoney' && !isNewBetCashout()">
                                 {{ newBetCalculatedProfitMoney }}
@@ -170,10 +118,7 @@
                         </td>
 
                         <!-- Action Column -->
-                        <td 
-                            *ngIf="col.key === 'action'"
-                            [class]="'col-' + col.key"
-                            [class.hidden]="!col.visible"
+                        <td *ngIf="col.key === 'action'" [class]="'col-' + col.key" [class.hidden]="!col.visible"
                             [style.width.px]="col.width">
                             <div class="action-buttons">
                                 <button class="btn-add" [disabled]="isLoading" (click)="addBet()">ADD</button>
@@ -183,121 +128,86 @@
                 </tr>
 
                 <!-- Existing Bets Rows -->
-                <tr 
-                    *ngFor="let bet of bets; let i = index; trackBy: trackByIndex"
-                    class="editable-row">
+                <tr *ngFor="let bet of bets; let i = index; trackBy: trackByIndex" 
+                    [class.editable-row]="!isEditing(i)" 
+                    [class.editing-row]="isEditing(i)">
                     <ng-container *ngFor="let col of columns">
                         <!-- Date Column -->
-                        <td 
-                            *ngIf="col.key === 'date'"
-                            [class]="getCellClass(bet, col)"
-                            [style.width.px]="col.width">
-                            <input 
-                                type="date" 
-                                [(ngModel)]="bet.date"
-                                [disabled]="!isEditing(i)">
+                        <td *ngIf="col.key === 'date'" [class]="getCellClass(bet, col)" [style.width.px]="col.width">
+                            <input *ngIf="isEditing(i)" type="date" [(ngModel)]="bet.date">
+                            <span *ngIf="!isEditing(i)">{{ formatDate(bet.date) }}</span>
                         </td>
 
                         <!-- Text Input Columns -->
-                        <td 
-                            *ngIf="col.type === 'text'"
-                            [class]="getCellClass(bet, col)"
-                            [style.width.px]="col.width">
-                            <input 
-                                type="text" 
-                                [(ngModel)]="bet[col.key]"
-                                [disabled]="!isEditing(i)">
+                        <td *ngIf="col.type === 'text'" [class]="getCellClass(bet, col)" [style.width.px]="col.width">
+                            <input *ngIf="isEditing(i)" type="text" [(ngModel)]="bet[col.key]">
+                            <span *ngIf="!isEditing(i)">{{ bet[col.key] }}</span>
                         </td>
 
                         <!-- Decimal Number Columns -->
-                        <td 
-                            *ngIf="col.type === 'number'"
-                            [class]="getCellClass(bet, col)"
-                            [style.width.px]="col.width">
-                            <input 
-                                type="number" 
-                                step="0.01"
-                                [(ngModel)]="bet[col.key]"
-                                [disabled]="!isEditing(i)">
+                        <td *ngIf="col.type === 'number'" [class]="getCellClass(bet, col)" [style.width.px]="col.width">
+                            <input *ngIf="isEditing(i)" type="number" step="0.01" [(ngModel)]="bet[col.key]">
+                            <span *ngIf="!isEditing(i)">{{ bet[col.key] }}</span>
                         </td>
 
                         <!-- Integer Number Columns -->
-                        <td 
-                            *ngIf="col.type === 'long'"
-                            [class]="getCellClass(bet, col)"
-                            [style.width.px]="col.width">
-                            <input 
-                                type="number" 
-                                min="0"
-                                step="1"
-                                [(ngModel)]="bet[col.key]"
-                                [disabled]="!isEditing(i)"
+                        <td *ngIf="col.type === 'long'" [class]="getCellClass(bet, col)" [style.width.px]="col.width">
+                            <input *ngIf="isEditing(i)" type="number" min="0" step="1" [(ngModel)]="bet[col.key]"
                                 (input)="onIntegerInput($event, bet, col.key)">
+                            <span *ngIf="!isEditing(i)">{{ bet[col.key] }}</span>
                         </td>
-                        
+
                         <!-- Select Dropdown Columns -->
-                        <td 
-                            *ngIf="col.type === 'select'"
-                            [class]="getCellClass(bet, col)"
-                            [style.width.px]="col.width">
-                            <select 
-                                [(ngModel)]="bet[col.key]"
-                                [disabled]="!isEditing(i)"
+                        <td *ngIf="col.type === 'select'" [class]="getCellClass(bet, col)" [style.width.px]="col.width">
+                            <select *ngIf="isEditing(i)" [(ngModel)]="bet[col.key]"
                                 (ngModelChange)="col.key === 'wl' ? onWLChange(bet) : null">
                                 <option *ngFor="let opt of col.options" [value]="opt">
-                                    {{ opt || '-' }}
+                                    {{ opt }}
                                 </option>
                             </select>
+                            <span *ngIf="!isEditing(i)">{{ bet[col.key] }}</span>
                         </td>
 
                         <!-- Calculated Columns -->
-                        <td 
-                            *ngIf="col.type === 'calc'"
-                            [class]="getCellClass(bet, col)"
-                            [style.width.px]="col.width">
+                        <td *ngIf="col.type === 'calc'" [class]="getCellClass(bet, col)" [style.width.px]="col.width"
+                            [class.calc-cell]="isEditing(i)">
                             <!-- Editable Profit Money for Cashout When Editing -->
-                            <input 
-                                *ngIf="col.key === 'profitMoney' && isCashout(bet) && isEditing(i)"
-                                type="number"
-                                step="0.01"
-                                [(ngModel)]="bet.profitMoney"
-                                (ngModelChange)="onProfitMoneyChange(bet)"
+                            <input *ngIf="col.key === 'profitMoney' && isCashout(bet) && isEditing(i)" type="number"
+                                step="0.01" [(ngModel)]="bet.profitMoney" (ngModelChange)="onProfitMoneyChange(bet)"
                                 class="cashout-input">
-                            
+
                             <!-- Editable Profit Units for Cashout When Editing -->
-                            <input 
-                                *ngIf="col.key === 'profitUnits' && isCashout(bet) && isEditing(i)"
-                                type="number"
-                                step="0.01"
-                                [(ngModel)]="bet.profitUnits"
-                                (ngModelChange)="onProfitUnitsChange(bet)"
+                            <input *ngIf="col.key === 'profitUnits' && isCashout(bet) && isEditing(i)" type="number"
+                                step="0.01" [(ngModel)]="bet.profitUnits" (ngModelChange)="onProfitUnitsChange(bet)"
                                 class="cashout-input">
-                            
-                            <!-- Display Values (Non-Editing or Non-Cashout) -->
-                            <span *ngIf="!(col.key === 'profitMoney' && isCashout(bet) && isEditing(i)) && 
-                                         !(col.key === 'profitUnits' && isCashout(bet) && isEditing(i))">
-                                {{ getCellValue(bet, col) }}
+
+                            <!-- Display Profit Money -->
+                            <span *ngIf="col.key === 'profitMoney' && !(isCashout(bet) && isEditing(i))" 
+                                [class.win]="bet.profitMoney > 0" [class.loss]="bet.profitMoney < 0">
+                                {{ formatCurrency(bet.profitMoney) }}
+                            </span>
+
+                            <!-- Display Profit Units -->
+                            <span *ngIf="col.key === 'profitUnits' && !(isCashout(bet) && isEditing(i))"
+                                [class.win]="bet.profitUnits > 0" [class.loss]="bet.profitUnits < 0">
+                                {{ bet.profitUnits.toFixed(2) }}U
+                            </span>
+
+                            <!-- Display ROI -->
+                            <span *ngIf="col.key === 'roi'"
+                                [class.win]="isPositiveValue(bet.roi)" [class.loss]="isNegativeValue(bet.roi)">
+                                {{ bet.roi }}%
                             </span>
                         </td>
 
                         <!-- Action Column -->
-                        <td 
-                            *ngIf="col.key === 'action'"
-                            [class]="getCellClass(bet, col)"
-                            [style.width.px]="col.width">
+                        <td *ngIf="col.key === 'action'" [class]="getCellClass(bet, col)" [style.width.px]="col.width">
                             <div class="action-buttons">
-                                <button 
-                                    [disabled]="isLoading" 
-                                    [class]="isEditing(i) ? 'btn-save' : 'btn-edit'"
-                                    [title]="isEditing(i) ? 'Save' : 'Update'"
-                                    (click)="toggleEdit(i)">
+                                <button [disabled]="isLoading" [class]="isEditing(i) ? 'btn-save' : 'btn-edit'"
+                                    [title]="isEditing(i) ? 'Save' : 'Update'" (click)="toggleEdit(i)">
                                     {{ isEditing(i) ? '💾' : '✏️' }}
                                 </button>
-                                <button 
-                                    [disabled]="isLoading" 
-                                    class="btn-delete"
-                                    title="Delete"
-                                    (click)="deleteBet(i)">
+                                <button [disabled]="isLoading" class="btn-delete" title="Delete" (click)="deleteBet(i)">
                                     🗑️
                                 </button>
                             </div>
@@ -306,5 +216,20 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <h3>Add New Option</h3>
+            <p>Adding to: <strong>{{ modalColumnKey | uppercase }}</strong></p>
+
+            <input type="text" [(ngModel)]="newOptionValue" placeholder="Enter new value" (keyup.enter)="addNewOption()"
+                class="modal-input">
+
+            <div class="modal-buttons">
+                <button class="btn-cancel" (click)="closeModal()">Cancel</button>
+                <button class="btn-add-modal" (click)="addNewOption()">Add</button>
+            </div>
+        </div>
     </div>
 </div>

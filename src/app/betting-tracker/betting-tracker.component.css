@@ -312,15 +312,17 @@ td.col-action {
     right: -10px;
     background: #e7f3ff !important;
     z-index: 40;
-    padding: 2px 10px 2px 10px;
+    padding: 1px 4px !important;
 }
 
 .editable-row:hover td.col-action {
     background: #d0e7f9 !important;
 }
 
+/* Action column in new row gets normal padding */
 .new-row td.col-action {
     background: #e7f3ff !important;
+    padding: 2px 10px 2px 10px !important;
 }
 
 th .resizer {
@@ -339,23 +341,85 @@ th .resizer:hover {
 }
 
 td {
-    padding: 1px;
+    padding: 0px 3px;
     border: 1px solid #dee2e6;
     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 td.hidden {
     display: none;
 }
 
+/* Display mode - Regular table cells */
+td span {
+    display: inline-block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 20px;
+    vertical-align: middle;
+}
+
+/* Existing rows - very compact, force height */
+tbody tr:not(.new-row) {
+    height: 20px !important;
+}
+
+tbody tr:not(.new-row) td {
+    height: 20px !important;
+    max-height: 20px !important;
+    line-height: 20px;
+    padding: 0px 3px !important;
+    vertical-align: middle;
+}
+
+/* Override action column padding for existing rows */
+tbody tr:not(.new-row) td.col-action {
+    padding: 0px 3px !important;
+}
+
+/* Make rows taller when editing */
+tbody tr.editing-row {
+    height: 28px !important;
+}
+
+tbody tr.editing-row td {
+    height: 28px !important;
+    max-height: 28px !important;
+    padding: 2px 4px !important;
+}
+
+tbody tr.editing-row td.col-action {
+    padding: 2px 4px !important;
+}
+
+tbody tr.editing-row input,
+tbody tr.editing-row select {
+    height: 24px !important;
+    padding: 2px 4px !important;
+}
+
+/* Edit mode - Form inputs */
 td input, td select {
     width: 100%;
-    padding: 3px 4px;
+    padding: 1px 2px;
     border: 1px solid #ced4da;
     border-radius: 3px;
     font-size: 12px;
     box-sizing: border-box;
     margin: 0;
+    line-height: normal;
+}
+
+/* Ensure inputs in existing rows fit within 20px cells */
+tbody tr:not(.new-row) input,
+tbody tr:not(.new-row) select {
+    height: 18px !important;
+    line-height: 16px;
+    padding: 0px 2px;
 }
 
 td input:disabled, td select:disabled {
@@ -369,16 +433,27 @@ td input:disabled, td select:disabled {
     font-weight: 600;
 }
 
-.editable-row {
-    background: #fff;
-}
-
-.editable-row:hover {
-    background: #f8f9fa;
-}
-
 .new-row {
     background: #e7f3ff;
+}
+
+/* New row always has inputs, increase padding for better visibility */
+.new-row {
+    height: auto !important;
+}
+
+.new-row td {
+    padding: 6px 4px !important;
+    height: auto !important;
+    max-height: none !important;
+    line-height: normal;
+}
+
+.new-row input,
+.new-row select {
+    height: auto !important;
+    max-height: none;
+    padding: 3px 4px;
 }
 
 .win {
@@ -461,20 +536,201 @@ td input:disabled, td select:disabled {
     border-color: #0056b3;
 }
 
-.action-buttons {
+/* Action buttons in existing rows - compact */
+tbody tr:not(.new-row) .action-buttons {
+    display: flex;
+    gap: 2px;
+    justify-content: space-between;
+}
+
+tbody tr:not(.new-row) .btn-delete,
+tbody tr:not(.new-row) .btn-edit,
+tbody tr:not(.new-row) .btn-save {
+    padding: 1px 3px;
+    font-size: 11px;
+    width: 48%;
+    line-height: 1;
+    height: 18px;
+}
+
+/* Action buttons when editing - slightly bigger */
+tbody tr.editing-row .btn-delete,
+tbody tr.editing-row .btn-edit,
+tbody tr.editing-row .btn-save {
+    padding: 2px 4px;
+    font-size: 12px;
+    height: 24px;
+    line-height: 1.2;
+}
+
+/* Action buttons in new row - normal size */
+.new-row .action-buttons {
     display: flex;
     gap: 3px;
     justify-content: space-between;
+}
+
+.new-row .btn-add {
+    padding: 4px 6px;
+    font-size: 11px;
+    line-height: normal;
 }
 
 .calc-cell {
     background: #f8f9fa;
     font-weight: 600;
     text-align: center;
-    padding: 8px;
+    padding: 0px 3px;
 }
 
 button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    min-width: 400px;
+    max-width: 500px;
+}
+
+.modal-content h3 {
+    margin: 0 0 10px 0;
+    color: #495057;
+    font-size: 20px;
+}
+
+.modal-content p {
+    margin: 0 0 20px 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.modal-input:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-cancel {
+    background: #6c757d;
+    color: white;
+    border: 1px solid #6c757d;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-cancel:hover {
+    background: #5a6268;
+    border-color: #5a6268;
+}
+
+.btn-add-modal {
+    background: #28a745;
+    color: white;
+    border: 1px solid #28a745;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-add-modal:hover {
+    background: #218838;
+    border-color: #218838;
+}
+
+/* Dark Mode Modal */
+:host-context(.dark-mode) .modal-content {
+    background: #16213e;
+}
+
+:host-context(.dark-mode) .modal-content h3 {
+    color: #e0e0e0;
+}
+
+:host-context(.dark-mode) .modal-content p {
+    color: #a0a0a0;
+}
+
+:host-context(.dark-mode) .modal-input {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-color: #0f3460;
+}
+
+:host-context(.dark-mode) .modal-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Zebra striping for better row identification */
+tbody tr:nth-child(even):not(.new-row) td {
+    background-color: #f8f9fa;
+}
+
+tbody tr:nth-child(odd):not(.new-row) td {
+    background-color: #ffffff;
+}
+
+/* Maintain background on hover */
+tbody tr:nth-child(even):not(.new-row):hover td {
+    background-color: #e9ecef;
+}
+
+tbody tr:nth-child(odd):not(.new-row):hover td {
+    background-color: #f1f3f5;
+}
+
+/* Dark mode zebra striping */
+:host-context(.dark-mode) tbody tr:nth-child(even):not(.new-row) td {
+    background-color: #1a1a2e;
+}
+
+:host-context(.dark-mode) tbody tr:nth-child(odd):not(.new-row) td {
+    background-color: #16213e;
+}
+
+/* Dark mode hover - more distinct colors */
+:host-context(.dark-mode) tbody tr:nth-child(even):not(.new-row):hover td {
+    background-color: #243050;
+}
+
+:host-context(.dark-mode) tbody tr:nth-child(odd):not(.new-row):hover td {
+    background-color: #1e2d4d;
 }

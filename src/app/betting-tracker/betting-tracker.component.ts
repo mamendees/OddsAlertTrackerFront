@@ -2,12 +2,12 @@ import { Component, OnInit, ChangeDetectorRef, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../auth.service';
-import { 
-  BetTrackerService, 
-  BetTrackerDto, 
-  CreateBetTrackerDto, 
-  UpdateBetTrackerDto, 
-  BetTrackerStatisticsDto 
+import {
+  BetTrackerService,
+  BetTrackerDto,
+  CreateBetTrackerDto,
+  UpdateBetTrackerDto,
+  BetTrackerStatisticsDto
 } from '../bet-tracker.service';
 
 interface Column {
@@ -232,9 +232,9 @@ export class BettingTrackerComponent implements OnInit {
     };
 
     // For cashout, add manual profit values
-    if (wl === 'Cashout') {
+    if (wl === 'CASHOUT') {
       if (this.newBetProfitMoney === null || this.newBetProfitMoney === undefined) {
-        alert('Please enter Profit $ or Profit U for Cashout bets');
+        alert('Please enter Profit $ or Profit U for CASHOUT bets');
         return;
       }
       createDto.profitMoney = this.newBetProfitMoney;
@@ -320,7 +320,7 @@ export class BettingTrackerComponent implements OnInit {
     };
 
     // For cashout, add manual profit values
-    if (bet.wl === 'Cashout') {
+    if (bet.wl === 'CASHOUT') {
       updateDto.profitMoney = Number(bet.profitMoney);
       updateDto.profitUnits = Number(bet.profitUnits);
     }
@@ -331,34 +331,34 @@ export class BettingTrackerComponent implements OnInit {
       next: (response) => {
         const updatedBet = this.mapDtoToBet(response);
         Object.assign(this.bets[index], updatedBet);
-        
+
         this.editingIndex = -1;
         this.loadStatistics();
         this.isLoading = false;
-        
+
         this.cdr.markForCheck();
         this.cdr.detectChanges();
       },
       error: (error) => {
         console.log('Error updating bet:', error);
-        
+
         // Check if it's a validation error with multiple messages
         if (error.error?.errors) {
           const errorMessages: string[] = [];
-          
+
           // Loop through each field's errors
           for (const field in error.error.errors) {
             const fieldErrors = error.error.errors[field];
             errorMessages.push(`${field}: ${fieldErrors.join(', ')}`);
           }
-          
+
           alert('Validation failed:\n' + errorMessages.join('\n'));
         } else {
           // Single error message
           const errorMsg = error.error?.title || error.message || 'Unknown error';
           alert('Failed to update bet: ' + errorMsg);
         }
-        
+
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -427,7 +427,7 @@ export class BettingTrackerComponent implements OnInit {
   // ===================
 
   get newBetCalculatedProfitMoney(): string {
-    if (this.newBet.wl === 'Cashout') {
+    if (this.newBet.wl === 'CASHOUT') {
       return this.newBetProfitMoney !== null ? this.formatCurrency(this.newBetProfitMoney) : '-';
     }
 
@@ -444,7 +444,7 @@ export class BettingTrackerComponent implements OnInit {
   }
 
   get newBetCalculatedProfitUnits(): string {
-    if (this.newBet.wl === 'Cashout') {
+    if (this.newBet.wl === 'CASHOUT') {
       return this.newBetProfitUnits !== null ? this.newBetProfitUnits.toFixed(2) + 'U' : '-';
     }
 
@@ -462,7 +462,7 @@ export class BettingTrackerComponent implements OnInit {
   }
 
   get newBetCalculatedROI(): string {
-    if (this.newBet.wl === 'Cashout') {
+    if (this.newBet.wl === 'CASHOUT') {
       const stake = parseFloat(this.newBet.stake);
       if (stake && this.newBetProfitMoney !== null) {
         const roi = ((this.newBetProfitMoney / stake) * 100).toFixed(1);
@@ -497,7 +497,7 @@ export class BettingTrackerComponent implements OnInit {
   }
 
   onNewBetWLChange(): void {
-    if (this.newBet.wl !== 'Cashout') {
+    if (this.newBet.wl !== 'CASHOUT') {
       this.newBetProfitMoney = null;
       this.newBetProfitUnits = null;
     }
@@ -505,34 +505,34 @@ export class BettingTrackerComponent implements OnInit {
 
   onNewBetProfitMoneyChange(): void {
     const stake = parseFloat(this.newBet.stake);
-    if (this.newBet.wl === 'Cashout' && stake > 0 && this.newBetProfitMoney !== null) {
+    if (this.newBet.wl === 'CASHOUT' && stake > 0 && this.newBetProfitMoney !== null) {
       this.newBetProfitUnits = this.newBetProfitMoney / stake;
     }
   }
 
   onNewBetProfitUnitsChange(): void {
     const stake = parseFloat(this.newBet.stake);
-    if (this.newBet.wl === 'Cashout' && stake > 0 && this.newBetProfitUnits !== null) {
+    if (this.newBet.wl === 'CASHOUT' && stake > 0 && this.newBetProfitUnits !== null) {
       this.newBetProfitMoney = this.newBetProfitUnits * stake;
     }
   }
 
   onProfitMoneyChange(bet: Bet): void {
-    if (bet.wl === 'Cashout' && bet.stake > 0) {
+    if (bet.wl === 'CASHOUT' && bet.stake > 0) {
       bet.profitUnits = bet.profitMoney / bet.stake;
       bet.roi = ((bet.profitMoney / bet.stake) * 100).toFixed(1);
     }
   }
 
   onProfitUnitsChange(bet: Bet): void {
-    if (bet.wl === 'Cashout' && bet.stake > 0) {
+    if (bet.wl === 'CASHOUT' && bet.stake > 0) {
       bet.profitMoney = bet.profitUnits * bet.stake;
       bet.roi = ((bet.profitMoney / bet.stake) * 100).toFixed(1);
     }
   }
 
   onWLChange(bet: Bet): void {
-    if (bet.wl !== 'Cashout') {
+    if (bet.wl !== 'CASHOUT') {
       bet.profitMoney = this.calculateProfit(bet.stake, bet.odds, bet.wl);
       bet.profitUnits = bet.stake > 0 ? bet.profitMoney / bet.stake : 0;
       bet.roi = bet.stake > 0 ? ((bet.profitMoney / bet.stake) * 100).toFixed(1) : '0.0';
@@ -622,9 +622,8 @@ export class BettingTrackerComponent implements OnInit {
     let classes = `col-${column.key}`;
     if (!column.visible) classes += ' hidden';
     if (column.type === 'calc') {
-      classes += ' calc-cell';
-      if (bet.wl === 'W' || (bet.wl === 'Cashout' && bet.profitMoney > 0)) classes += ' win';
-      if (bet.wl === 'L' || (bet.wl === 'Cashout' && bet.profitMoney < 0)) classes += ' loss';
+      if (bet.wl === 'W' || (bet.wl === 'CASHOUT' && bet.profitMoney > 0)) classes += ' win';
+      if (bet.wl === 'L' || (bet.wl === 'CASHOUT' && bet.profitMoney < 0)) classes += ' loss';
     }
     return classes;
   }
@@ -634,11 +633,27 @@ export class BettingTrackerComponent implements OnInit {
   }
 
   isCashout(bet: Bet): boolean {
-    return bet.wl === 'Cashout';
+    return bet.wl === 'CASHOUT';
   }
 
   isNewBetCashout(): boolean {
-    return this.newBet.wl === 'Cashout';
+    return this.newBet.wl === 'CASHOUT';
+  }
+
+  isPositiveValue(value: string | number): boolean {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return num > 0;
+  }
+
+  isNegativeValue(value: string | number): boolean {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return num < 0;
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   }
 
   trackByIndex(index: number): number {
@@ -649,12 +664,12 @@ export class BettingTrackerComponent implements OnInit {
   onIntegerInput(event: any, targetObj: any, field: string): void {
     const value = event.target.value;
     const num = Number(value);
-    
+
     // If not a valid number, ignore (don't change anything)
     if (isNaN(num)) {
       return;
     }
-    
+
     // Apply: absolute value + round
     const result = Math.abs(Math.round(num));
     targetObj[field] = result;
@@ -704,6 +719,73 @@ export class BettingTrackerComponent implements OnInit {
         }
       });
     }
+  }
+
+  // Modal state
+  showModal: boolean = false;
+  modalColumnKey: string = '';
+  newOptionValue: string = '';
+
+  onSelectChange(event: Event, colKey: string, target: any): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const value = selectElement.value;
+
+    if (value === '__ADD_NEW__') {
+      this.openAddModal(colKey);
+      // Força o select a voltar para o valor anterior IMEDIATAMENTE
+      selectElement.value = target[colKey] || '';
+      event.preventDefault();
+      event.stopPropagation();
+    } else {
+      target[colKey] = value;
+      console.log('colKey', colKey)
+      // Trigger change events
+      if (colKey === 'wl') {
+        if (target === this.newBet) {
+          this.onNewBetWLChange();
+        } else {
+          this.onWLChange(target);
+        }
+      }
+    }
+  }
+
+  openAddModal(columnKey: string): void {
+    this.modalColumnKey = columnKey;
+    this.newOptionValue = '';
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.modalColumnKey = '';
+    this.newOptionValue = '';
+  }
+
+  addNewOption(): void {
+    if (!this.newOptionValue.trim()) {
+      alert('Please enter a value');
+      return;
+    }
+
+    const column = this.columns.find(col => col.key === this.modalColumnKey);
+    if (column && column.options) {
+      const newValue = this.newOptionValue.trim().toUpperCase();
+
+      // Check if value already exists
+      if (column.options.includes(newValue)) {
+        alert('This option already exists');
+        return;
+      }
+
+      // Add new option to the array
+      column.options.push(newValue);
+
+      // TODO: Call API to save the new option
+      // this.betTrackerService.addColumnOption(this.modalColumnKey, newValue).subscribe(...)
+    }
+
+    this.closeModal();
   }
 
   // ===================
